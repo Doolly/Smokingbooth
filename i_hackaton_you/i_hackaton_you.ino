@@ -35,5 +35,6 @@ void loop() {
   GetPir();
   FanCtrl(top_fan_speed, bottom_fan_speed); 
   Change_Value_in_Serial();
-  awesome choi;
+  awesome ;
+  awesome lee;
 }
