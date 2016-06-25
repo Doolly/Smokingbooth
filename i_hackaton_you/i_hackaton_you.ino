@@ -1,38 +1,38 @@
+/*------ Headers to Include ------*/
 #include <MsTimer2.h>
-#include <DHT11.h>
 #include <Wire.h>
 #include <LiquidCrystal_I2C.h>
-
+/*------ Pin Define ------*/
 #define TOP_THERMO 7
 #define BOTTOM_THERMO 4
 #define PIR 2
 #define TOP_FAN 11
 #define BOTTOM_FAN 10
-
-LiquidCrystal_I2C lcd(0x3F, 16, 2); //lcd init
-DHT11 TOP_THERMO1(TOP_THERMO1);
-DHT11 TOP_THERMO2(TOP_THERMO2);
-
+/*------ Objects ------*/
+LiquidCrystal_I2C lcd(0x3F, 16, 2); // LCD address to 0x3F for 16*2 clcd SDA=A4,SCL=A5
+//DHT11 TOP_THERMO1(TOP_THERMO1);
+//DHT11 TOP_THERMO2(TOP_THERMO2);
+/*------ Functions ------*/
 void GetTemp();
-int GetPir();
-void FanCtrl(int top, int bottom);
-
+void GetPir();
+void FanCtrl(int top_fan_speed,int bottom_fan_speed);
 void LcdCtrl(int air_condition);
-int pir_how_to;
-//volatile int pir_flag = 0; 인터럽트 안씀
+void Change_Value_in_Serial();
+/*------ Global Variables ------*/
+int people;
+int top_fan_speed;
+int bottom_fan_speed;
+int pir_prev;
+unsigned int lastBounceTime;
 
 void setup() {
-//  attachInterrupt(0, GetPir, RISING); 인터럽트 안씀
   pinMode(PIR, INPUT);
-  pinMode(13, OUTPUT);
-  pinMode(12, OUTPUT);
   Serial.begin(9600);
   lcd.init();
 }
 void loop() {
-  int sensor = digitalRead(pir_pin);
-  Serial.println(sensor); // 이 두줄은 그냥 확인용
-  GetTemp();
+  //GetTemp();
   GetPir();
-  FanCtrl(int top, int bottom); // pir 이란 normalize 잡아야 함
+  FanCtrl(top_fan_speed, bottom_fan_speed); 
+  Change_Value_in_Serial();
 }
