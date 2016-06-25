@@ -2,86 +2,41 @@
 #include <DHT11.h>
 #include <Wire.h> 
 #include <LiquidCrystal_I2C.h>
+#define on_sup_pin1 0 //온습도 센서 1
+#define on_sup_pin2 4
+#define pir_pin 2 
+#define motor_pwm1 11 //1번 모터 pwm
+#define motor_pwm2 9 // 2번 모터 pwm
+// #define led 3 // pir센서 테스트용 led 필요없음
 
-LiquidCrystal_I2C lcd(0x3F,16,2);  
-//
-int pin=2;  //dht11 
-int pin2=4; //dht11
-int led = 3; 
-DHT11 dht11(pin); // 2번 온습도
-DHT11 dht11_2(pin2); // 4번 온습도
-int pirPin = 7; // pir 센서 시그널핀
-int motor1 = 11; //pwm motor1 
+LiquidCrystal_I2C lcd(0x3F,16,2); //lcd i2c번호 랑 16*2사이즈라는 뜻
 
-int timer_count =0;
+DHT11 on_sup1(on_sup_pin1); // 2번 온습도
+DHT11 on_sup2(on_sup_pin2); // 4번 온습도
 
-void pir_sensor()
-{
-  int sensor = digitalRead(pirPin);
-  Serial.println(sensor);
-  if(sensor == 1)
-  {
-    digitalWrite(led, HIGH);
-  }
-  else if(sensor == 0)
-  {
-    timer_count++;
-    if(timer_count > 20)
-    {
-      digitalWrite(led,LOW);
-      timer_count = 0;
-    }
-  }
-}
+volatile int flag = 0;
+
+void temp_humid(); //온습도
+void pir_on(); //pir rising 
+void pir_off(); //pir falling
+void motor(int motor_speed,volatile int flag);
 
 void setup()
 {
   lcd.init();
-  pinMode(pirPin, INPUT);
-  pinMode(led, OUTPUT);
-  MsTimer2::set(50 , pir_sensor);
-  MsTimer2::start();
+  //pinMode(pir_pin, INPUT);
+  pinMode(12,OUTPUT);
+  pinMode(8, OUTPUT);
+  //pinMode(led, OUTPUT);
+  attachInterrupt(0,pir_on,RISING);
+  attachInterrupt(0,pir_off,FALLING);
   Serial.begin(9600);
-}
-
-void temp_humid()
-{
-  int err;
-  int err2; // changed
-  float temp, humi;
-  float temp2, humi2; // changed
-  if( ((err=dht11.read(humi, temp))==0)&& (err2=dht11_2.read(humi2, temp2) == 0) )
-  {
-    lcd.backlight();
-    lcd.display();
-    lcd.print("TEMP :    ");
-    lcd.print(temp);
-    lcd.setCursor(0,1);
-    lcd.print("HUMIDITY :");
-    lcd.print(humi);
-
-    delay(2000);
-    lcd.clear();
-    lcd.backlight();
-    lcd.display();
-    lcd.print("TEMP2:    ");
-    lcd.print(temp2);
-    lcd.setCursor(0,1);
-    lcd.print("HUMIDITY2:");
-    lcd.print(humi2);
-  }
-  else
-  {
-    lcd.backlight();
-    lcd.display();
-    lcd.print("ERROR NO.: ");
-    lcd.print(err);
-  }
-  delay(2000); //2초마다 Refresh
-  lcd.clear();
 }
 void loop()
 {
+  int sensor = digitalRead(pir_pin);
+  Serial.println(sensor); // 이 두줄은 그냥 확인용 
+  
   temp_humid();
+  motor(255, flag);
 }
-
