@@ -1,19 +1,20 @@
-//void GetTemp() {
-//  int err;
-//  int err2;
-//  float temp, humi;
-//  float temp2, humi2; // changed
-//  if ( ((err = TOP_THERMO1.read(humi, temp)) == 0) && (err2 = TOP_THERMO2.read(humi2, temp2) == 0) )
-//  {
-//    //공기 청정 지수 계산
-//    int air_condition;
-//    LcdCtrl(air_condition);
-//  }
-//  else
-//  {
-//    LcdCtrl(-1); //온도값이 들어오지 않은 에러 상황
-//  }
-//}
+void GetTemp(void) {
+  top_humidity = int(dht_t.readHumidity()); // Read temperature as Celsius (the default)
+  top_temp = int(dht_t.readTemperature());
+  bottom_humidity = int(dht_b.readHumidity());
+  bottom_temp = int(dht_b.readTemperature());
+
+  if (isnan(top_humidity) || isnan(top_temp)) {
+    Serial.println("Failed to read from top DHT sensor!");
+    return;
+  }
+  if (isnan(bottom_humidity) || isnan(bottom_temp)) {
+    Serial.println("Failed to read from bottom DHT sensor!");
+    return;
+  }
+  Serial.print("top_temp = " + String(top_temp) + " *C " + "\n");
+  Serial.print("bottom_temp = " + String(bottom_temp) + " *C " + "\n");
+}
 
 void GetPir() {
   int pir_now = digitalRead(PIR);
